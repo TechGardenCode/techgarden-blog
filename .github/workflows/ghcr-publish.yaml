@@ -95,7 +95,7 @@ jobs:
       - name: Update kustomization.yaml with new image tag
         run: |
           cd $GITOPS_PATH
-          yq -i '.image.tag = "${{ env.IMAGE_TAG }}"' values.yaml
+          yq -i '.image.tag = "${{ github.sha }}"' values.yaml
 
       - name: Commit and push to GitOps repo
         run: |
@@ -103,5 +103,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add values.yaml
-          git commit -m "chore: update image tag to ${{ env.IMAGE_TAG }}"
+          git commit -m "chore: update image tag to ${{ github.sha }}"
           git push
