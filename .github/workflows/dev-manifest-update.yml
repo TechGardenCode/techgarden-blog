@@ -1,0 +1,40 @@
+name: dev manifest update
+on:
+  workflow_run:
+    workflows: ["ghcr publish"]
+    branches: [ dev ]
+    types: [ completed ]
+
+permissions:
+  contents: write
+
+env:
+  GITOPS_REPO: techgardencode/homelab
+  DEV_APP_PATH: kubernetes/clusters/1276-dev/techgarden/blog
+
+jobs:
+  update-dev:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Clone GitOps repo
+        run: |
+          git clone https://x-access-token:${{ secrets.GITOPS_PUSH_TOKEN }}@github.com/techgardencode/homelab.git
+          cd homelab/kubernetes/clusters/1276-dev/techgarden/blog
+          echo "GITOPS_PATH=$PWD" >> $GITHUB_ENV
+
+      - name: Update kustomization.yaml with new image tag
+        run: |
+          cd $GITOPS_PATH
+          yq -i '.image.tag = "${{ github.sha }}"' values.yaml
+
+      - name: Commit and push to GitOps repo
+        run: |
+          cd $GITOPS_PATH
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add values.yaml
+          git commit -m "chore: update image tag to ${{ github.sha }}"
+          git push
