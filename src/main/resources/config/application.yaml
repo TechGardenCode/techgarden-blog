@@ -21,3 +21,8 @@ spring:
               action: create
               create-target: create.sql
               create-source: metadata
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
