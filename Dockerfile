@@ -1,5 +1,4 @@
-from openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-ADD target/blog-0.0.1-SNAPSHOT.jar /app/app.jar
-expose 8080
+COPY target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
