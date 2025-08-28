@@ -1,4 +1,4 @@
-name: deployment.ym
+name: deployment.yml
 
 on:
   push:
