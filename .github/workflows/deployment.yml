@@ -1,5 +1,13 @@
-name: deployment.yml
+name: deployment.ym
+
 on:
+  push:
+    branches:
+      - "main"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-deploy:
