@@ -1,0 +1,23 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: techgarden-blog
+  datasource:
+    url: jdbc:postgresql://${PG_HOSTNAME}:${PG_PORT:5432}/${PG_DB:blog}
+    username: ${PG_USER}
+    password: ${PG_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  jpa:
+    properties:
+      hibernate.jdbc.time_zone: UTC
+      jakarta:
+        persistence:
+          schema-generation:
+            scripts:
+              action: create
+              create-target: create.sql
+              create-source: metadata
