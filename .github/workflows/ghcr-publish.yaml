@@ -7,8 +7,6 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  GITOPS_REPO: techgardencode/homelab
-  DEV_APP_PATH: kubernetes/clusters/1276-dev/techgarden/blog
 
 jobs:
   build-and-push-dev:
@@ -81,9 +79,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-
-    env:
-      IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
 
     steps:
       - name: Clone GitOps repo

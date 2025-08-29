@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 spring:
   application:
     name: techgarden-blog
@@ -14,13 +14,6 @@ spring:
   jpa:
     properties:
       hibernate.jdbc.time_zone: UTC
-      jakarta:
-        persistence:
-          schema-generation:
-            scripts:
-              action: create
-              create-target: create.sql
-              create-source: metadata
 management:
   endpoints:
     web:
