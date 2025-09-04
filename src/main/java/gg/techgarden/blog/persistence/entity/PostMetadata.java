@@ -2,10 +2,7 @@ package gg.techgarden.blog.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,13 +20,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PostMetadata {
     @Id
-    @Column(name = "user_id")
+    @Column(name = "post_id")
     private UUID id;
 
     @OneToOne
     @MapsId
     @JsonIgnore
     @JoinColumn(name="post_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Post post;
 
     private String title;

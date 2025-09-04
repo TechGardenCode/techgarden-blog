@@ -13,6 +13,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -33,6 +34,9 @@ public class Post {
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PostBody body;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostBodyJson> postBodyJson;
 
     @CreationTimestamp
     private Instant createdAt;
