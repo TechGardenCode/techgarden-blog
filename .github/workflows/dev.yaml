@@ -2,7 +2,7 @@ name: ghcr publish
 
 on:
   push:
-    branches: ['dev', 'main']
+    branches: ['dev']
 
 env:
   REGISTRY: ghcr.io
@@ -58,7 +58,6 @@ jobs:
             prefix=
             suffix=
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=sha,prefix=,format=long
             type=raw,value=dev,enable=${{ github.ref == format('refs/heads/{0}', 'dev') }}
 
