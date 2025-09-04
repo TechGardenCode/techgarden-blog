@@ -18,12 +18,12 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostMetadata {
+public class PostBody {
     @Id
     @Column(name = "post_id")
     private UUID id;
 
-    @OneToOne
+    @OneToOne()
     @MapsId
     @JsonIgnore
     @JoinColumn(name="post_id")
@@ -31,12 +31,8 @@ public class PostMetadata {
     @EqualsAndHashCode.Exclude
     private Post post;
 
-    private String title;
-    private String description;
-    private String author;
-    private List<String> tags;
-    private List<String> categories;
-    private String imageUrl;
+    @Lob
+    private String content;
 
     @CreationTimestamp
     private Instant createdAt;

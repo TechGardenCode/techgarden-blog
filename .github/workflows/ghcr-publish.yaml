@@ -1,16 +1,16 @@
-name: Build and Push Docker Image to GHCR
+name: ghcr publish
 
 on:
   push:
-    branches:
-      - main
+    branches: ['dev', 'main']
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push:
+  build-and-push-dev:
+    if: github.event_name == 'push' && contains(github.ref, 'refs/heads/dev')
     runs-on: ubuntu-latest
 
     permissions:
@@ -60,6 +60,8 @@ jobs:
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=sha,prefix=,format=long
+            type=raw,value=dev,enable=${{ github.ref == format('refs/heads/{0}', 'dev') }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -70,6 +72,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  update-dev:
+    needs: build-and-push-dev
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
       - name: Clone GitOps repo
         run: |
           git clone https://x-access-token:${{ secrets.GITOPS_PUSH_TOKEN }}@github.com/techgardencode/homelab.git

@@ -1,8 +1,12 @@
 package gg.techgarden.blog.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
@@ -18,25 +22,21 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostMetadata {
+public class Post {
     @Id
-    @Column(name = "post_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne
-    @MapsId
-    @JsonIgnore
-    @JoinColumn(name="post_id")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Post post;
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private PostMetadata metadata;
 
-    private String title;
-    private String description;
-    private String author;
-    private List<String> tags;
-    private List<String> categories;
-    private String imageUrl;
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private PostBody body;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostBodyJson> postBodyJson;
 
     @CreationTimestamp
     private Instant createdAt;
