@@ -38,11 +38,15 @@ public class PostService {
     @Transactional
     public Page<PostMetadata> getAllPostMetadataForCurrentUser(Pageable pageable) {
         UUID sub = SecurityUtil.getCurrentUserSub().orElseThrow(() -> new HttpClientErrorException(HttpStatus.FORBIDDEN));
-        if (!profileRepository.existsById(sub)) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN);
+        try {
+            if (!profileRepository.existsById(sub)) {
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+            }
+            Profile profile = profileRepository.findById(sub).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+            return postMetadataRepository.findAllByAuthor(profile, pageable);
+        } catch (HttpClientErrorException ex) {
+            return Page.empty(pageable);
         }
-        Profile profile = profileRepository.findById(sub).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        return postMetadataRepository.findAllByAuthor(profile, pageable);
     }
 
     public Page<Post> getPosts(Pageable pageable) {
