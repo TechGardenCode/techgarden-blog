@@ -1,6 +1,7 @@
 package gg.techgarden.blog.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import gg.techgarden.blog.cache.profile.Profile;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,7 +24,7 @@ public class PostMetadata {
     @Column(name = "post_id")
     private UUID id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JsonIgnore
     @JoinColumn(name="post_id")
@@ -33,10 +34,13 @@ public class PostMetadata {
 
     private String title;
     private String description;
-    private String author;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name="author_id", referencedColumnName = "sub")
+    private Profile author;
     private List<String> tags;
     private List<String> categories;
     private String imageUrl;
+    private boolean publicPost;
 
     @CreationTimestamp
     private Instant createdAt;

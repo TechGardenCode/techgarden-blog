@@ -23,10 +23,10 @@ public class PostBody {
     @Column(name = "post_id")
     private UUID id;
 
-    @OneToOne()
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JsonIgnore
     @JoinColumn(name="post_id")
+    @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Post post;

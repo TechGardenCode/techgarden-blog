@@ -23,7 +23,7 @@ public class PostBodyJson {
 
     private int lineNumber;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
