@@ -4,11 +4,14 @@ import gg.techgarden.blog.persistence.entity.Post;
 import gg.techgarden.blog.persistence.entity.PostMetadata;
 import gg.techgarden.blog.service.PostService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -17,12 +20,16 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/posts")
 @RequiredArgsConstructor
+@Slf4j
 public class PostController {
 
     private final PostService postService;
 
     @GetMapping("/metadata")
-    public Page<PostMetadata> getAllPostMetadata(@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Page<PostMetadata> getAllPostMetadata(@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, @RequestParam boolean includePrivate) {
+        if (includePrivate) {
+            return postService.getAllPostMetadataForCurrentUser(pageable);
+        }
         return postService.getAllPostMetadata(pageable);
     }
 

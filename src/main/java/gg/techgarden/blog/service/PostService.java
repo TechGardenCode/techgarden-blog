@@ -1,5 +1,7 @@
 package gg.techgarden.blog.service;
 
+import gg.techgarden.blog.cache.profile.Profile;
+import gg.techgarden.blog.cache.profile.ProfileRepository;
 import gg.techgarden.blog.model.PostBodyType;
 import gg.techgarden.blog.persistence.entity.Post;
 import gg.techgarden.blog.persistence.entity.PostBodyJson;
@@ -7,6 +9,7 @@ import gg.techgarden.blog.persistence.entity.PostMetadata;
 import gg.techgarden.blog.persistence.repository.PostBodyJsonRepository;
 import gg.techgarden.blog.persistence.repository.PostMetadataRepository;
 import gg.techgarden.blog.persistence.repository.PostRepository;
+import gg.techgarden.blog.util.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,9 +28,25 @@ public class PostService {
     private final PostMetadataRepository postMetadataRepository;
     private final PostRepository postRepository;
     private final PostBodyJsonRepository postBodyJsonRepository;
+    private final ProfileRepository profileRepository;
 
+    @Transactional
     public Page<PostMetadata> getAllPostMetadata(Pageable pageable) {
-        return postMetadataRepository.findAll(pageable);
+        return postMetadataRepository.findAllByPublicPostIsTrue(pageable);
+    }
+
+    @Transactional
+    public Page<PostMetadata> getAllPostMetadataForCurrentUser(Pageable pageable) {
+        UUID sub = SecurityUtil.getCurrentUserSub().orElseThrow(() -> new HttpClientErrorException(HttpStatus.FORBIDDEN));
+        try {
+            if (!profileRepository.existsById(sub)) {
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+            }
+            Profile profile = profileRepository.findById(sub).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+            return postMetadataRepository.findAllByAuthor(profile, pageable);
+        } catch (HttpClientErrorException ex) {
+            return Page.empty(pageable);
+        }
     }
 
     public Page<Post> getPosts(Pageable pageable) {
@@ -56,7 +75,20 @@ public class PostService {
         post.getMetadata().setPost(post);
         post.getBody().setPost(post);
         post.getPostBodyJson().forEach(postBodyJson -> postBodyJson.setPost(post));
+        setOrUpdateProfile(post.getMetadata());
         return postRepository.save(post);
+    }
+
+    void setOrUpdateProfile(PostMetadata postMetadata) {
+        if (postMetadata == null) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Post metadata is required");
+        }
+        UUID sub = SecurityUtil.getCurrentUserSub().orElseThrow(() -> new HttpClientErrorException(HttpStatus.FORBIDDEN));
+        if (!profileRepository.existsById(sub)) {
+            Profile profile = SecurityUtil.getCurrentUserProfile().orElseThrow(() -> new HttpClientErrorException(HttpStatus.FORBIDDEN));
+            profileRepository.save(profile);
+        }
+        postMetadata.setAuthor(profileRepository.findById(sub).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND)));
     }
 
     public Post getPostById(UUID id) {
