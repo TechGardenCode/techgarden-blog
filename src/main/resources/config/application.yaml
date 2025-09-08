@@ -18,7 +18,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://sso.dev.techgarden.gg/realms/techgarden
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
 management:
   endpoints:
     web:
