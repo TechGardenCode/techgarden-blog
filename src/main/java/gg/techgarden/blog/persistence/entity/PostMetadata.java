@@ -26,8 +26,8 @@ public class PostMetadata {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JsonIgnore
     @JoinColumn(name="post_id")
+    @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Post post;

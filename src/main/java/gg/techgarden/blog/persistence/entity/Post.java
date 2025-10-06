@@ -32,7 +32,7 @@ public class Post {
     private PostBody body;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostBodyJson> postBodyJson;
+    private List<PostReaction> reactions;
 
     @CreationTimestamp
     private Instant createdAt;
