@@ -23,7 +23,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Profile {
     @Id
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private UUID sub;
     private String displayName;
     private String email;

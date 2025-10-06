@@ -31,4 +31,5 @@ public interface PostMetadataRepository extends JpaRepository<PostMetadata, UUID
             nativeQuery = true
     )
     Page<PostMetadata> findTopLikedSinceNative(@Param("since") Instant since, Pageable pageable);
+
 }

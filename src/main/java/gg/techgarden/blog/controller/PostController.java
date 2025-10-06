@@ -49,6 +49,10 @@ public class PostController {
         return postService.createPost(post);
     }
 
+    @DeleteMapping("/{id}")
+    public Post deletePost(@PathVariable UUID id) {
+        return postService.deletePost(id);
+    }
 
     @GetMapping("/{id}")
     public Post getPostById(@PathVariable UUID id) {

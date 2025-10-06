@@ -52,7 +52,7 @@ public class PostService {
 
     public Page<PostMetadata> getLatestPostMetadata(Pageable pageable) {
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createdAt").descending());
-        return postMetadataRepository.findAll(sortedPageable);
+        return postMetadataRepository.findAllByPublicPostIsTrue(sortedPageable);
     }
 
     public Page<Post> getPosts(Pageable pageable) {
@@ -73,6 +73,19 @@ public class PostService {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
         }
         return savePost(post);
+    }
+
+    public Post deletePost(UUID id) {
+        UUID sub = SecurityUtil.getCurrentUserSub().orElseThrow(() -> new HttpClientErrorException(HttpStatus.FORBIDDEN));
+        Post post = getPostById(id);
+        if (post == null) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+        }
+        if (!post.getMetadata().getAuthor().getSub().equals(sub)) {
+            throw new HttpClientErrorException(HttpStatus.FORBIDDEN);
+        }
+        postRepository.delete(post);
+        return post;
     }
 
     public Post savePost(Post post) {
