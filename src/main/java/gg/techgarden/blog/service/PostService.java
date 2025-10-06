@@ -108,8 +108,15 @@ public class PostService {
     }
 
     public Post getPostById(UUID id) {
-        return postRepository.findById(id)
+        Post post = postRepository.findById(id)
                 .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        if (!post.getMetadata().isPublicPost()) {
+            UUID sub = SecurityUtil.getCurrentUserSub().orElseThrow(() -> new HttpClientErrorException(HttpStatus.FORBIDDEN));
+            if (!post.getMetadata().getAuthor().getSub().equals(sub)) {
+                throw new HttpClientErrorException(HttpStatus.FORBIDDEN);
+            }
+        }
+        return post;
     }
 
     public Page<PostMetadata> getTopPostMetadataByTimeframe(Pageable pageable, TopPostTimeframe topPostTimeframe) {
