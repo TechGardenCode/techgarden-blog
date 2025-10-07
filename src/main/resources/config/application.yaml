@@ -16,6 +16,17 @@ spring:
       hibernate.jdbc.time_zone: UTC
   security:
     oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI}
+        registration:
+          svc-blog:
+            provider: keycloak
+            client-id: svc.blog
+            client-secret: ${CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            redirect-uri: "{baseUrl}/api/login/oauth2/code/{registrationId}"
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI}
@@ -24,3 +35,4 @@ management:
     web:
       exposure:
         include: health,info
+KEYCLOAK_ISSUER_URI: https://sso.dev.techgarden.gg/realms/techgarden
