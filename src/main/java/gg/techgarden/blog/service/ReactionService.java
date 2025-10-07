@@ -7,8 +7,11 @@ import gg.techgarden.blog.model.ReactionType;
 import gg.techgarden.blog.persistence.entity.Reaction;
 import gg.techgarden.blog.persistence.repository.ReactionRepository;
 import gg.techgarden.blog.util.SecurityUtil;
+import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -37,7 +40,10 @@ public class ReactionService {
         return reactionRepository.findReactionCountByPostIdAndUserId(postId, sub);
     }
 
-    public void addReactionToPost(UUID postId, ReactionType reactionType) {
+    public Reaction addReactionToPost(UUID postId, ReactionType reactionType) {
+        if (reactionType == ReactionType.COMMENT) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Use addCommentToPost to add comments");
+        }
         Profile profile = profileService.getCurrentUserProfile();
         Reaction reaction = new Reaction();
         reaction.setParentId(postId);
@@ -45,9 +51,30 @@ public class ReactionService {
         reaction.setUser(profile);
         reaction.setParentType(ReactionParentType.POST);
         if (reactionRepository.existsByParentIdAndUserSubAndType(postId, profile.getSub(), reactionType)) {
-            return;
+            return null;
         }
-        reactionRepository.save(reaction);
+        return reactionRepository.save(reaction);
+    }
+
+    public Reaction addCommentToPost(UUID postId, ReactionType reactionType, String content) {
+        if (reactionType != ReactionType.COMMENT) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Only COMMENT reaction type is allowed for comments");
+        }
+        if (StringUtils.isBlank(content)) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Content cannot be empty");
+        }
+        Profile profile = profileService.getCurrentUserProfile();
+        Reaction reaction = new Reaction();
+        reaction.setParentId(postId);
+        reaction.setType(reactionType);
+        reaction.setUser(profile);
+        reaction.setParentType(ReactionParentType.POST);
+        reaction.setContent(content);
+        return reactionRepository.save(reaction);
+    }
+
+    public Page<Reaction> getCommentsForPost(UUID postId, Pageable pageable) {
+        return reactionRepository.findAllByParentIdAndType(postId, ReactionType.COMMENT, pageable);
     }
 
     @Transactional
@@ -57,5 +84,16 @@ public class ReactionService {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
         }
         reactionRepository.removeByParentIdAndUserSubAndType(postId, sub, reactionType);
+    }
+
+    @Transactional
+    public void removeCommentFromPost(UUID postId, UUID reactionId) {
+        UUID sub = SecurityUtil.getCurrentUserSub().orElseThrow(() -> new HttpClientErrorException(HttpStatus.FORBIDDEN));
+        Reaction reaction = reactionRepository.findById(reactionId)
+                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        if (!reaction.getParentId().equals(postId) || !reaction.getUser().getSub().equals(sub) || reaction.getType() != ReactionType.COMMENT) {
+            throw new HttpClientErrorException(HttpStatus.FORBIDDEN);
+        }
+        reactionRepository.delete(reaction);
     }
 }

@@ -3,6 +3,8 @@ package gg.techgarden.blog.persistence.repository;
 import gg.techgarden.blog.model.ReactionType;
 import gg.techgarden.blog.persistence.entity.Reaction;
 import jakarta.persistence.Tuple;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -33,7 +35,7 @@ public interface ReactionRepository extends JpaRepository<Reaction, UUID> {
     )
     List<String> findReactionCountByPostIdAndUserId(UUID postId, UUID userId);
 
-    boolean existsByParentIdAndType(UUID parentId, ReactionType type);
+    Page<Reaction> findAllByParentIdAndType(UUID postId, ReactionType type, Pageable pageable);
 
     boolean existsByParentIdAndUserSubAndType(UUID parentId, UUID userId, ReactionType type);
 
